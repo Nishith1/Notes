@@ -113,3 +113,308 @@ Spring Boot	Explains layers, annotations, validation, error handling	Confused be
 Deployment	Familiar with Jenkins, Git, ECS/K8s, basic CI/CD	Has “heard of it” but can’t explain
 Kafka & Cloud	Basic working knowledge	No clarity on producer-consumer flow
 Communication	Explains flow clearly, owns work	Blames infra or others
+
+
+
+
+
+
+
+
+
+
+
+Here’s a 15-minute practical coding task specifically designed for vendor/contractual Java Spring Boot developers who will be doing low-level coding, API development, and deployments.
+
+This task is simple enough to complete quickly, but reveals a lot about their actual ability to write clean, working code.
+
+🧪 15-Minute Coding Task: “User Management API”
+📝 Problem Statement
+
+Build a simple Spring Boot REST API to manage users.
+
+Create an API endpoint:
+
+POST /users — accepts a JSON request body with user details and saves it to an in-memory list or map.
+
+GET /users — returns the list of all users.
+
+📥 Example Request
+POST /users
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john.doe@example.com"
+}
+
+📤 Example Response (POST success)
+{
+  "message": "User added successfully"
+}
+
+📤 Example Response (GET)
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe@example.com"
+  }
+]
+
+✅ Evaluation Criteria
+Area	What to Look For	Bonus
+Spring Boot Setup	Can create a controller with proper annotations (@RestController, @PostMapping, @GetMapping)	Uses proper project structure (controller, service, model)
+JSON Mapping	Uses @RequestBody properly	Uses DTO/model cleanly
+Validation	At least checks basic null values / required fields	Uses @Valid and Bean Validation annotations
+Data Handling	Uses a static list or ConcurrentHashMap to store users	Separation of layers (service class)
+Response Handling	Returns proper JSON response	Returns ResponseEntity with appropriate HTTP status
+Code Quality	Clean, readable code	Uses meaningful names and exception handling
+💡 Hints (Optional if they get stuck)
+
+If the candidate is stuck after 5–7 mins, give these nudges:
+
+“Use @RestController and @PostMapping for the API.”
+
+“Use a static List or Map to store users in memory.”
+
+“Don’t worry about database for now.”
+
+🧰 Bonus Extensions (if they finish early) (Pick 1 or 2)
+
+Add validation to ensure email is not blank.
+
+Return 400 Bad Request if input is invalid.
+
+Add DELETE /users/{id} endpoint to delete a user.
+
+Log the API calls using @Slf4j or Logger.
+
+🧑‍💻 What This Task Reveals
+
+Whether they can code independently without copy-pasting.
+
+How well they know Spring Boot annotations and structure.
+
+How cleanly they handle request–response and basic validations.
+
+How quickly they can get a working service up (a crucial skill for vendor devs).
+
+👉 Tip for you during interview:
+
+Share this task as a Google Doc / Paste in the meeting chat.
+
+Let them screen share and code.
+
+If they can’t finish in 15 mins, it’s still very telling how they approach the problem.
+
+If they complete it smoothly, they’ll likely be able to handle real project tasks with minimal guidance.
+
+
+
+
+
+
+Absolutely ✅
+Since your team will have vendor/contractual developers doing low-level backend coding, API development, deployment, and integration, here’s an expanded list of structured technical interview questions — categorized by skill area.
+
+This list goes beyond the basics, mixing practical scenario-based questions with conceptual ones to differentiate between candidates who’ve only “used” technologies and those who actually understand them.
+
+🧠 1. Core Java & OOPs – Must-Have Fundamentals
+
+These test their coding foundation and debugging ability.
+
+Conceptual
+
+What’s the difference between String, StringBuilder, and StringBuffer? When would you use each?
+
+What is the difference between final, finally, and finalize()?
+
+What happens if you don’t override hashCode() when overriding equals()?
+
+What is the difference between Comparable and Comparator?
+
+What is the difference between ArrayList and LinkedList? Which one is faster for insert/delete?
+
+How does HashMap handle collisions?
+
+Why is HashMap not thread-safe and what would you use instead in multithreading?
+
+Practical/Scenario
+
+Suppose you have a list of users. How will you remove duplicates based on ID? (Streams / loops)
+
+How do you handle a NullPointerException in a clean way?
+
+How do you make a class immutable?
+
+How would you sort a list of employees by their names?
+
+⚙️ 2. Spring Boot / REST API Development
+
+Since most work will revolve around this, these are crucial.
+
+Conceptual
+
+What’s the difference between @Controller and @RestController?
+
+How does dependency injection work in Spring?
+
+What are @Component, @Service, @Repository, and how do they differ?
+
+How does Spring Boot auto-configuration work?
+
+How do you handle exceptions globally in Spring Boot?
+
+What are the different scopes of beans in Spring?
+
+How do you validate request payloads in Spring Boot?
+
+Practical/Scenario
+
+How would you secure a REST API without using a full authentication server?
+
+How do you pass configuration values to your Spring Boot app for different environments?
+
+Suppose your downstream API fails. How do you handle fallback gracefully?
+
+If you have 3 microservices and 1 goes down, how would you keep the system stable?
+
+How do you log incoming requests and outgoing responses?
+
+☁️ 3. Microservices Architecture
+
+Even if they won’t design the architecture, they should understand how services interact.
+
+What’s the difference between Monolithic and Microservices architecture?
+
+How do services communicate with each other in your project?
+
+What is the purpose of service discovery (like Eureka)?
+
+How would you handle failures in a distributed system?
+
+What is a Circuit Breaker? Where would you use it?
+
+What is idempotency and why is it important in APIs?
+
+How do you version REST APIs in a microservice setup?
+
+🔁 4. Kafka & Messaging
+
+Many resumes mention Kafka. Good to test for real knowledge.
+
+What is Kafka and why is it used?
+
+What’s the difference between a Producer and a Consumer?
+
+What is a Kafka topic and partition?
+
+How do you handle message retries or dead-letter queues in Kafka?
+
+How would you ensure exactly-once processing in Kafka?
+
+How can you make sure your consumer doesn’t lose messages if the service restarts?
+
+How would you handle out-of-order messages?
+
+🧰 5. CI/CD, Deployment & DevOps Basics
+
+They’ll often be doing deployments themselves.
+
+What CI/CD tools have you worked with? (Jenkins, GitHub Actions, GitLab CI, etc.)
+
+Walk me through your typical build → deploy process.
+
+How do you handle environment-specific configurations during deployment?
+
+What is the difference between ECS and EC2?
+
+Have you worked with Docker? How do you create a Docker image for a Spring Boot app?
+
+How do you roll back a deployment if something breaks?
+
+How do you verify whether your deployed API is healthy?
+
+🧪 6. Database & JPA
+
+They’ll be doing basic CRUD operations and data handling.
+
+What is the difference between @Entity and @Table in JPA?
+
+What are the differences between lazy and eager loading?
+
+How do you write a custom query in Spring Data JPA?
+
+How do you handle transactions in Spring?
+
+What’s the difference between save() and saveAndFlush() in JPA?
+
+What is the N+1 select problem and how do you handle it?
+
+How do you handle pagination in a Spring Boot API?
+
+🧭 7. Logging, Monitoring & Error Handling
+
+Useful for maintenance and debugging work.
+
+How do you log in Spring Boot applications? (Log4j, SLF4J)
+
+How do you log incoming requests and outgoing responses?
+
+How would you trace errors in production?
+
+What tools have you used for monitoring logs? (Splunk, CloudWatch, etc.)
+
+How would you debug a sudden spike in 500 errors in your service?
+
+What would you do if your service is up, but response times are very slow?
+
+🧪 8. Testing & Quality
+
+You’ll want devs who don’t break the build.
+
+How do you write unit tests in Spring Boot?
+
+Which testing frameworks have you used? (JUnit, Mockito, etc.)
+
+What is the difference between a unit test and an integration test?
+
+How do you mock external services in tests?
+
+How do you verify your API behaves as expected before deployment?
+
+🚨 9. Real-World Scenario Questions
+
+These are very effective for vendor profiles because they reveal practical problem-solving skills.
+
+“Your API suddenly starts returning 500 errors after deployment. What are the first 3 things you’ll check?”
+
+“You deployed a new version, but the previous one was stable. How do you debug and roll back?”
+
+“You need to deploy a fix at midnight. What steps will you take before and after the deployment?”
+
+“A downstream service is failing intermittently. How will you make your service resilient?”
+
+“How do you make an API idempotent?”
+
+“What if Kafka messages are stuck in lag? How do you troubleshoot?”
+
+🏁 Optional (If you want to push strong candidates)
+
+Explain how you would implement rate limiting in a Spring Boot service.
+
+How would you secure communication between two services?
+
+How would you implement caching in a service? (e.g., using Redis or Caffeine)
+
+How do you handle backward compatibility when changing API contracts?
+
+✅ Pro Tip for Interviews
+
+Pick 2–3 questions from each section rather than asking everything.
+
+Start easy, then increase depth based on their answers.
+
+Use “tell me how you did it in your project” — it quickly exposes bluffing.
+
+Keep 1 practical scenario or coding question to ensure they can execute.
