@@ -1,0 +1,115 @@
+🕐 Interview Structure (60 min)
+Time	Area	Focus
+0–5 min	Intro	Quick background discussion
+5–25 min	Core Java + API Development	OOPs, REST API coding & error handling
+25–45 min	Spring Boot + Microservices	Real-world implementation questions
+45–55 min	CI/CD + Deployment	DevOps basics, Kafka & AWS
+55–60 min	Q&A / Wrap-up	Candidate questions
+🧠 1. Core Java & OOPs (5–25 min)
+
+These test whether they can code cleanly and handle backend tasks independently.
+
+What is the difference between == and .equals() in Java?
+
+Explain how HashMap works internally. Why should hashCode and equals be overridden together?
+
+How do you handle exceptions in a layered application? Can you give a real example?
+
+Can you explain the difference between checked and unchecked exceptions with an example?
+
+Explain how you would make a class immutable in Java.
+
+How do you use Streams and Lambda in day-to-day development?
+
+Write a simple function to remove duplicates from a list of integers using Streams. (live or whiteboard)
+
+⚙️ 2. REST API & Spring Boot (25–45 min)
+
+Most of their daily work will be here — coding, bug fixing, writing services, and calling APIs.
+
+Explain the flow of a REST API call in a Spring Boot application.
+
+How do you define a REST endpoint in Spring Boot? (Ask them to write a small example)
+
+How do you handle validation in Spring Boot APIs? (Bean Validation / @Valid)
+
+How do you handle global exceptions in a microservice? (ControllerAdvice / ExceptionHandler)
+
+How do you secure an API using Spring Security or basic authentication?
+
+What are @Component, @Service, @Repository, and how are they different?
+
+How do you use profiles in Spring Boot for different environments (dev/test/prod)?
+
+Explain how you externalize configuration in Spring Boot.
+
+What are common HTTP status codes you return in APIs? When do you use each?
+
+🧪 Live scenario example:
+
+“You have to create a POST /users API to save a new user in DB. Walk me through:
+
+the layers you’ll create,
+
+annotations you’ll use,
+
+how you’ll validate input and return response.”
+
+☁️ 3. Kafka, Microservices & Cloud Basics (45–55 min)
+
+Many of the resumes you shared include Kafka, AWS, Docker, ECS, etc.
+
+What is Kafka and where have you used it? (Producer / Consumer flow)
+
+How will you handle Kafka message failures? (retry / DLQ)
+
+How will you deploy a Spring Boot app in ECS or Kubernetes? (high level)
+
+What are the common AWS services you’ve used? (S3, ECS, EC2, RDS — check actual resume claims)
+
+What is the difference between monolithic and microservice architecture?
+
+How do you implement inter-service communication in microservices? (REST, Feign, Kafka, etc.)
+
+Explain Circuit Breaker pattern and where you would use it.
+
+How do you monitor services? (Splunk, CloudWatch, etc.)
+
+🧰 4. DevOps & Practical Know-how (55–60 min)
+
+These will help filter candidates who can deploy without hand-holding.
+
+Explain how CI/CD works in your project. Which tools are used?
+
+What is the difference between Jenkins pipeline and GitHub Actions?
+
+How do you do rollback in case of a bad deployment?
+
+How do you handle property management across environments?
+
+Have you worked with SonarQube? What kinds of issues does it detect?
+
+🧪 Optional Coding Exercise (if time permits or pre-assignment)
+
+Ask the candidate to:
+
+Write a simple Spring Boot REST endpoint that:
+
+Accepts JSON input
+
+Validates it
+
+Saves to a dummy in-memory list or Map
+
+Returns proper success/failure response
+
+This small exercise will immediately separate theoretical candidates from practical developers.
+
+✅ Evaluation Guidelines
+Skill Area	Good Candidate	Red Flag
+Core Java	Clear understanding of Collections, OOP, exceptions	Vague, can’t explain hashCode/equals
+API Development	Can write & explain a REST endpoint confidently	Only talks theory
+Spring Boot	Explains layers, annotations, validation, error handling	Confused between annotations / layers
+Deployment	Familiar with Jenkins, Git, ECS/K8s, basic CI/CD	Has “heard of it” but can’t explain
+Kafka & Cloud	Basic working knowledge	No clarity on producer-consumer flow
+Communication	Explains flow clearly, owns work	Blames infra or others
