@@ -1,0 +1,56 @@
+ID
+Component
+Test Name
+Type
+Steps
+Expected
+Objective
+Owner
+O-API-B1
+Orchestrator
+Get API details — happy path
+Functional
+1. Call GET /api/config/{externalProviderDatasetName} with valid dataset (e.g. PREFERENCES_AFFLUENT). 2. Verify response JSON.
+200 OK with correct JSON fields (endpoint, method, headers, retryPolicy).
+Validate that API successfully retrieves the configuration for a valid dataset name.
+QA
+O-API-B2
+Orchestrator
+Dataset not found
+Negative
+Call endpoint with a dataset name that does not exist in DB.
+404 Not Found or 200 with empty body and appropriate message.
+Ensure the API gracefully handles missing dataset names without crashing.
+QA
+O-API-B3
+Orchestrator
+Missing path parameter
+Negative
+Call /api/config/ without specifying the dataset name.
+400 Bad Request or 404 with message “dataset name required”.
+Confirm API validates input and fails fast for missing parameters.
+QA
+O-API-B4
+Orchestrator
+Response schema validation
+Contract
+Call API and inspect structure of response JSON.
+JSON contains expected fields with correct data types.
+Ensure returned configuration matches the expected schema.
+QA
+O-API-B5
+Orchestrator
+Malformed JSON in DB
+Negative
+Manually insert malformed JSON into api_configuration_value_text column for a dataset, then call API.
+422 or 500 error with descriptive message; service should not crash.
+Verify system handles corrupted JSON data gracefully.
+QA
+O-API-B6
+Orchestrator
+Large configuration payload
+Performance
+Store large JSON config (many headers/fields) and call API.
+200 OK within acceptable latency (<500ms).
+Validate performance and stability with large payloads.
+
