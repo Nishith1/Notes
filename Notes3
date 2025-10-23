@@ -1,0 +1,249 @@
+Orchestrator
+
+Purpose: schedule jobs, persist job metadata, emit file-ready / job events, provide APIs.
+	1.	Job creation (happy path)
+
+	•	Objective: create a job record and verify DB row + scheduler entry.
+	•	Preconditions: valid file metadata and dataset config exists.
+	•	Steps: call CreateJob API (POST) with valid payload.
+	•	Expected: DB optimus_jobs_info (or processing_job_metrics) row created, returned job_id is UUID, scheduler scheduled according to scheduledAt. Scheduler acknowledges scheduling.
+
+	2.	Job creation (invalid metadata)
+
+	•	Objective: validate error handling for missing/invalid fields.
+	•	Steps: POST with missing external_provider_dataset_id or invalid cron.
+	•	Expected: 4xx error, no DB row created, error message explains invalid param.
+
+	3.	Dynamic scheduler from scheduledAt (cron/text)
+
+	•	Objective: scheduler reads DB scheduledAt and schedules runs dynamically.
+	•	Steps: create a job with near-future scheduledAt (e.g., run in 1 minute). Check scheduler logs/metrics.
+	•	Expected: job queued/executed at scheduled time; processing_job_metrics entry created.
+
+	4.	Trigger-immediately flag
+
+	•	Objective: jobs with triggered_immediately=true should run right away.
+	•	Steps: create job with flag true.
+	•	Expected: job starts immediately and processing_job_metrics created.
+
+	5.	Concurrency / distributed lock (multiple orchestrator pods)
+
+	•	Objective: scheduler only triggers a job once across pods.
+	•	Steps: run two orchestrator instances pointing to same DB; create a job.
+	•	Expected: only one pod acquires lock, job trigger occurs once.
+
+	6.	API: Get job status / list (pagination/filter)
+
+	•	Objective: APIs return correct job state and filters.
+	•	Steps: call GET /jobs?status=RUNNING etc.
+	•	Expected: correct rows and pagination metadata.
+
+	7.	Resilience: DB failure
+
+	•	Objective: orchestrator handles transient DB errors gracefully.
+	•	Steps: simulate DB unavailable during job creation.
+	•	Expected: API returns 5xx or retries; no partial records; logs capture error. Retry policies applied.
+
+	8.	Audit fields naming and consistency test
+
+	•	Objective: ensure created_by/created_at (or your replacements) are populated and consistent.
+	•	Steps: create job, inspect DB fields.
+	•	Expected: fields populated, timezone consistent.
+
+
+
+
+
+
+
+
+
+
+
+Processor
+
+Purpose: read transformed payloads from S3 (on transformer event), create per-record DB entries, call downstream API, handle retries, record results in optimus_processor_log / api_processing_result.
+
+Note: you decided earlier to have record-level DB entries. Tests reflect that design.
+	1.	Event ingestion -> DB record creation (happy path)
+
+	•	Objective: on transformer event, processor creates DB entries for all records in chunk.
+	•	Precondition: a transformer event with chunkS3Path and count.
+	•	Steps: send event; processor fetches S3 file and inserts N records to DB.
+	•	Expected: api_processing_result has N rows (one per record) with status PENDING or CREATED.
+
+	2.	API call sequence & successful responses
+
+	•	Objective: processor reads DB rows and calls client API for each record.
+	•	Steps: client-app mock returns 200; run processor flow.
+	•	Expected: DB rows updated with responseStatusCode=200, is_successful=true, attempt_retry_count=0.
+
+	3.	Retry logic (transient failures)
+
+	•	Objective: retry on retryable error codes; stop after max retries.
+	•	Steps: mock client returns 503 twice then 200; observe retry scheduler.
+	•	Expected: attempt_retry_count increments; final status SUCCESS; appropriate timestamps.
+
+	4.	Permanent failure (non-retryable)
+
+	•	Objective: on non-retryable (4xx) mark failed and do not retry.
+	•	Steps: mock client returns 400.
+	•	Expected: is_successful=false, error_type=NON_RETRYABLE, retries stopped.
+
+	5.	Partial chunk success (some records fail, some succeed)
+
+	•	Objective: per-record behavior independent.
+	•	Steps: mix of responses from client-app.
+	•	Expected: DB reflects per-record statuses; processor emits partition-complete event with counts.
+
+	6.	Throughput for daily delta (25k–50k) — perf
+
+	•	Objective: validate processor handles daily expected max within target SLA.
+	•	Steps: simulate 50k records with mock client responding fast.
+	•	Expected: completes within SLA; DB inserts and updates acceptable; CPU/memory stable.
+
+	7.	Idempotency & at-least-once semantics
+
+	•	Objective: ensure duplicate events do not create duplicate DB rows or cause double-calls.
+	•	Steps: re-send transformer event (same chunk) or simulate re-delivery.
+	•	Expected: dedup by chunkId/fileId or job-level idempotency key; duplicate processing avoided.
+
+	8.	DB transactional integrity
+
+	•	Objective: partial failures when writing DB must not leave inconsistent state.
+	•	Steps: simulate DB commit failure during batch insert.
+	•	Expected: rollbacks occur, retries or error recorded.
+
+	9.	Error logging / failed payload storage
+
+	•	Objective: failed payloads are persisted to failure S3 location with metadata.
+	•	Steps: mock repeated failures; verify S3 failure file exists, DB references it.
+
+	10.	Security: outbound call auth and headers
+
+	•	Objective: ensure correct headers/credentials used when calling downstream API.
+	•	Steps: inspect requests from processor (or mock server capture).
+	•	Expected: headers present, tokens correct, secrets not logged.
+
+
+
+
+
+Client App (Mock API)
+
+Purpose: provide a configurable mock endpoint to emulate downstream API (TPS control, retries, failures).
+	1.	Tunable TPS behavior (happy path)
+
+	•	Objective: when client receives tps param, response delay equals configured logic.
+	•	Steps: call /mock? tps=10 or POST body with tps.
+	•	Expected: service delays response for baseDelay / tps formula and returns 200.
+
+	2.	Simple API (removed chunk logic) — validate simple response
+
+	•	Objective: ensure response object is simple JSON with status & message.
+	•	Steps: call API, inspect response.
+	•	Expected: {"status":"OK","tps":10,"delayAppliedMs":100}.
+
+	3.	Retry simulation endpoint
+
+	•	Objective: simulate transient errors for N calls then success.
+	•	Steps: call endpoint with failures=2 control param; call repeatedly.
+	•	Expected: first 2 calls return 503, 3rd returns 200.
+
+	4.	Rate-limited response (optional)
+
+	•	Objective: mocking throttling: return 429 for high TPS.
+	•	Steps: call with very high tps or internal counter.
+	•	Expected: 429 returned as designed.
+
+	5.	No DB / side-effects assertion
+
+	•	Objective: verify app indeed does not write to DB.
+	•	Steps: call endpoints and inspect logs.
+	•	Expected: no DB writes, only in-memory logic.
+
+⸻
+
+Shared infra & integration tests
+
+(Validate end-to-end flows, events, persistence, and resilience)
+	1.	Kafka event contract tests
+
+	•	Objective: messages (file-ready, partition-ready, transformed-ready, chunk-processed, processor-complete) conform to Avro schema.
+	•	Steps: produce and consume message; validate schema.
+	•	Expected: schema validation passes.
+
+	2.	S3 read/write permissions & lifecycle
+
+	•	Objective: components can read/write to expected S3 paths; verify encryption and ACLs.
+	•	Steps: write test file and read back.
+	•	Expected: success, correct bucket, encryption enabled.
+
+	3.	DB schema & migration tests
+
+	•	Objective: app starts with DB migrations; schema correct.
+	•	Steps: run migration tool against test DB.
+	•	Expected: tables & indexes present; constraints correct.
+
+	4.	End-to-end happy path (small file)
+
+	•	Objective: full flow from orchestrator to processor and notification.
+	•	Steps: create job, let partitioner/transformer/processor run using mocks for heavy parts.
+	•	Expected: final notification sent, DB metrics updated, Kafka events produced.
+
+	5.	Failure injection & recovery (chaos)
+
+	•	Objective: simulate component failure mid-flow and validate recovery.
+	•	Steps: kill transformer pod while transforming; restart.
+	•	Expected: retry/resume behavior consistent; no data loss.
+
+	6.	Backpressure and slow downstream behavior
+
+	•	Objective: when client-app intentionally delays, processor should throttle or queue accordingly without OOM.
+	•	Steps: set client-app delay high; run small job.
+	•	Expected: processor respects concurrency limits, DB reflects PENDING states, overall system stable.
+
+⸻
+
+Health, Actuator and Admin APIs
+	1.	Health check API tests (liveness, readiness)
+
+	•	Objective: /health/liveness returns 200 when app is responsive; readiness indicates downstream readiness.
+	•	Steps: call endpoints; simulate DB down or Kafka down.
+	•	Expected: liveness stays up; readiness fails if dependencies down.
+
+	2.	Actuator endpoints protected and not leaking secrets
+
+	•	Objective: ensure actuator endpoints require auth.
+	•	Steps: access /actuator/ without auth.
+	•	Expected: 401/403.
+
+⸻
+
+Test data suggestions
+	•	Keep a small set of golden files: CSV (10–100 rows), JSONL (10–100), intentional malformed files for negative tests.
+	•	Use generated UUIDs for job/file IDs.
+	•	Provide sample onboarding metadata JSON for mapping & validations.
+	•	Mock client-app with configurable behavior parameters (tps, failures, statusCode, delayMs).
+
+⸻
+
+Prioritization (what to run first)
+	1.	Unit tests for each component (business logic).
+	2.	Contract tests (Avro/Kafka schema validation).
+	3.	Integration tests for S3/DB/Kafka connectivity (non-functional).
+	4.	End-to-end scenario with mocks.
+	5.	Performance and reliability tests (throughput, retries, resilience).
+
+
+
+
+
+
+
+
+
+
+
+
+
