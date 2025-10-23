@@ -1,0 +1,91 @@
+id
+component
+test name
+type
+steps
+expected
+owner
+OR-UP-01
+Orchestrator
+File upload — happy path
+Functional
+1. Authenticate as valid user. 2. Call file-upload API with valid metadata + supported file (CSV/JSON) under size limit. 3. Confirm HTTP 200/201.
+200/201 returned; response includes uploadId, s3Path, status=accepted; DB row created in file_processing_configuration (or related table).
+QA / Backend
+OR-UP-02
+Orchestrator
+File upload — missing metadata
+Functional / Negative
+1. Call file-upload API with file but omit required metadata (e.g., external_provider_dataset_id).
+4xx (400) with clear validation error message; no DB row created; file not stored.
+QA
+OR-UP-03
+Orchestrator
+File upload — unsupported file type
+Functional / Negative
+1. Attempt upload with unsupported file type (e.g., .exe).
+4xx (415 or 400) with message “unsupported file type”; file rejected; no DB entry.
+QA
+OR-UP-04
+Orchestrator
+File upload — too large file
+Functional / Negative
+1. Upload file larger than configured maxFileSize in onboarding metadata.
+413 (Payload Too Large) or 400 with message; no DB record; upload aborted.
+QA
+OR-UP-05
+Orchestrator
+File upload — invalid schema / file-level validation failure
+Functional
+1. Upload file that fails the file-level validations configured (e.g., wrong delimiter, missing file header).
+422 (Unprocessable) or 400 with validation details; DB entry with status=validation_failed and validation message persisted.
+QA
+OR-UP-06
+Orchestrator
+File upload — resume / duplicate upload handling
+Functional
+1. Upload same file twice (same filename + checksum) or interrupted upload then retry.
+If duplicate: either idempotent response (return existing uploadId) or new entry flagged as duplicate per design; interrupted upload can be resumed if resume supported; no inconsistent duplicates.
+QA / Backend
+OR-UP-07
+Orchestrator
+File upload — auth/authorization enforcement
+Security
+1. Call upload API without token. 2. Call with token of user without upload rights.
+401 for unauthenticated; 403 for unauthorized; no DB or S3 side effects.
+Security / QA
+OR-UP-08
+Orchestrator
+File upload — S3/store failure (simulate S3 error)
+Resilience
+1. Simulate S3 failure (403/500 or network). 2. Call upload API.
+API returns 5xx or graceful error; DB entry either not created or created with status=upload_failed and retry metadata; no partial objects left.
+QA / Backend
+OR-UP-09
+Orchestrator
+File upload — DB commit rollback on failure
+Integration
+1. Make upload where S3 succeeds but DB write fails (simulate DB rollback).
+Either S3 object cleaned up (if possible) or DB entry absent and system retries/marks orphaned file; error logged and alerting triggered.
+Backend
+OR-UP-10
+Orchestrator
+File upload — checksum / integrity validation
+Functional
+1. Upload file with checksum header or provide checksum param. 2. Upload with mismatched checksum.
+If checksum mismatch: reject with 400 and message; no DB row; if match, accept.
+QA
+OR-UP-11
+Orchestrator
+File upload — concurrent uploads throttling / rate limits
+Performance
+1. Trigger N concurrent uploads (exceeding configured concurrency). 2. Observe responses.
+System enforces throttling/queues requests; excess requests are returned 429 or queued; system remains stable.
+QA / Performance
+OR-UP-12
+Orchestrator
+File upload — event(s) triggered after successful upload
+Integration
+1. Complete successful upload. 2. Verify orchestrator publishes expected Kafka event (or triggers partitioner) and DB status updated to “uploaded/pending”.
+Kafka topic receives file_ready event with correct payload; DB status updated; downstream component can consume event.
+QA / Integration
