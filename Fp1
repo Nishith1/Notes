@@ -1,0 +1,74 @@
+Here’s your final, polished performance review covering all four major workstreams:
+
+File Processor & Enhanced File Processor
+
+Morph & Photon modernization
+
+Recon Processor analysis
+
+Universal Data Comparator initiative (new addition)
+
+🧭 1. Business Results
+
+This year, I delivered strong business outcomes by driving key engineering initiatives across multiple strategic platform tools owned by the team.
+
+Led critical deliveries and modernization of the File Processor — including certificate renewals, Photon upgrade, Multicard updates, recon analysis, performance testing, and uplift of code coverage from 23% to 85%, exceeding compliance goals.
+
+Played a core role in building the Enhanced File Processor, completing requirement gathering, DB table reviews, infra provisioning (GKP clusters, Kafka, S3, Auth configs), and successfully deploying skeleton apps in Dev. Actively contributed to Orchestrator, Processor, and Client components along with Avro schema and API development.
+
+Conducted deep analysis of Relationship APG Data Comparator, building a strong understanding of its architecture and functionality. This foundation allowed me to actively influence the redesign of the new Universal Data Comparator (UDC) — providing meaningful inputs that shape the tool’s architecture and delivery approach.
+
+Contributed to Morph PoC and Photon Upgrade to modernize transformation execution, enabling future migration to platformized flows.
+
+Executed Recon Processor analysis across APG teams to align and standardize recon implementations for future platform use.
+
+Actively participated in production activities like SNOW CR creation, review cycles, and deployment execution to ensure delivery continuity.
+
+✅ Impact: Strengthened platform performance and reliability, laid a scalable foundation for platform adoption across LOBs, and helped define the future of UDC and File Processor as enterprise utilities.
+
+🤝 2. Client / Customer / Stakeholder
+
+Throughout the year, I maintained strong engagement with partner teams, architects, and platform stakeholders to align technical execution with strategic goals.
+
+Closely collaborated with Relationships, Identity, and Preferences APG teams to understand transformation, comparator, and recon implementations, ensuring smooth integration into platformized solutions.
+
+Partnered with platform and architecture stakeholders to present Enhanced File Processor design, secure buy-in, and align on long-term vision.
+
+Engaged with platform and Photon teams for uplift efforts, ensuring compatibility with enterprise standards and minimizing downstream impact.
+
+Provided critical inputs and architectural clarity during UDC redesign discussions, helping shape the next-generation comparator tool.
+
+Partnered with infra, deployment, and capacity teams to execute certificate renewals, capacity analysis closure, and deployment planning.
+
+✅ Impact: Strengthened collaboration, accelerated alignment on design and strategy, and enhanced trust with stakeholders through active architectural and delivery contributions.
+
+👥 3. Teamwork and Leadership
+
+As a Lead Software Engineer, I actively enabled my team, influenced architecture, and created structures to ensure sustainable delivery.
+
+Authored multiple Confluence documents covering Comparator, Transformer, File Processor setup, deployment flows, and recon architecture, improving team onboarding and shared knowledge.
+
+Proactively guided junior team members on setup, testing, coverage improvements, and platform processes.
+
+Took initiative to explain Photon upgrades, SNOW deployment flows, and other complex platform processes, improving the team’s self-sufficiency.
+
+Provided technical leadership during UDC design discussions, leveraging my early deep-dive analysis of the existing Comparator to influence the new architecture.
+
+Championed cross-APG KT sessions and design walkthroughs, ensuring alignment across tools and teams.
+
+Maintained strong ownership of deliverables while ensuring clarity of communication with leadership, stakeholders, and peers.
+
+✅ Impact: Enabled stronger technical maturity within the team, influenced product architecture, and ensured the team is well-positioned for successful execution in upcoming quarters.
+
+📝 Summary Statement
+
+Over the year, my contributions spanned four major impact areas:
+
+Core File Processor enhancements and platform uplift.
+
+Enhanced File Processor design and development.
+
+Platform modernization through Morph, Photon Upgrade, and Recon Processor analysis.
+
+Strategic contribution to the Universal Data Comparator initiative through deep analysis, architectural input, and forward-looking planning.
+
