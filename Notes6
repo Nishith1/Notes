@@ -1,0 +1,200 @@
+Data Migration Guidelines
+
+(DB2 / File Storage → CockroachDB)
+
+1. Purpose
+
+These guidelines define the mandatory standards for migrating data into CockroachDB from:
+	•	DB2
+	•	File storage (S3 / Data Lake)
+
+All migration activities in this LOB must comply with this document to ensure:
+	•	Data correctness
+	•	Operational safety
+	•	Auditability
+	•	Predictable cutover and rollback
+
+⸻
+
+2. Scope
+
+In Scope
+	•	Batch-based migrations
+	•	One-time or phased data loads
+	•	Customer, account, preference, profile, and reference datasets
+
+Out of Scope
+	•	Real-time bi-directional synchronization
+	•	Active-active database patterns
+	•	Business logic–heavy transformations
+
+⸻
+
+3. Mandatory Principles
+
+The following principles must be followed for every migration:
+	1.	Schema-first approach
+Target CockroachDB schema must be finalized and approved before data movement.
+	2.	Idempotent data loads
+All loads must be repeatable without data corruption (UPSERT only).
+	3.	Replayability
+Migration jobs must support re-run and partial replay.
+	4.	Reconciliation-driven cutover
+Cutover is permitted only after reconciliation passes.
+	5.	Controlled write throughput
+Load jobs must throttle writes to protect CockroachDB.
+	6.	Rollback readiness
+Rollback plan must be documented and approved before execution.
+
+
+
+
+Source (DB2 / File)
+      ↓
+Extract (Snapshot / File Read)
+      ↓
+Transform (Schema Mapping)
+      ↓
+Load (Batch UPSERT)
+      ↓
+Reconciliation
+      ↓
+Cutover
+
+
+5. Migration Guidelines
+
+5.1 Schema & Compatibility
+	•	DB2 data types must be mapped to CockroachDB-compatible types.
+	•	DB-specific constructs (triggers, sequences, stored procedures) must not be migrated.
+	•	File-based migrations must define an explicit schema.
+	•	Schema changes after migration start are not permitted.
+
+Required Artifact: Schema Mapping Document
+
+⸻
+
+5.2 Data Extraction
+	•	DB2 extraction must use consistent snapshots.
+	•	Data must be extracted in deterministic key-based batches.
+	•	Direct reads from live production tables without isolation are prohibited.
+	•	Files must be validated for format, schema, and record count before processing.
+
+⸻
+
+5.3 Transformation
+
+Permitted:
+	•	Type conversion
+	•	Field renaming
+	•	Default value assignment
+	•	Basic data cleanup (trim, null handling)
+
+Prohibited:
+	•	Business logic
+	•	Aggregations
+	•	Derived calculations
+
+⸻
+
+5.4 Data Load into CockroachDB
+	•	All loads must use UPSERT / INSERT ON CONFLICT.
+	•	Recommended batch size: 500–2,000 records.
+	•	Parallelism must be increased gradually.
+	•	Secondary indexes should be disabled during bulk load where feasible.
+
+⸻
+
+5.5 Reconciliation (Mandatory)
+
+The following checks must be performed:
+	1.	Record count validation
+Source count must match target count.
+	2.	Data integrity validation
+Deterministic hash comparison for rows (full or sampled).
+	3.	Business validation (if applicable)
+Key business metrics (counts, totals, timestamps) must align.
+
+Cutover is not permitted unless reconciliation passes.
+
+⸻
+
+5.6 Cutover
+
+Preferred cutover strategy:
+	1.	Freeze writes to DB2
+	2.	Run final delta load
+	3.	Perform reconciliation
+	4.	Switch application traffic to CockroachDB
+
+Dual-write strategy requires explicit architectural approval.
+
+⸻
+
+5.7 Rollback
+	•	Application must be able to switch back to DB2.
+	•	CockroachDB data must be discardable.
+	•	Rollback steps must be documented before migration execution.
+
+
+
+
+6. Common Risks & Controls
+
+
+Risk
+Control
+Schema mismatch
+Mandatory schema validation
+CockroachDB overload
+Throttled batch writes
+Partial data load
+Checkpointed jobs
+Duplicate records
+UPSERT with primary keys
+Silent truncation
+Strict length validation
+
+
+7. Mandatory Deliverables
+
+Each migration must produce the following artifacts:
+	1.	Schema mapping document
+	2.	Migration runbook
+	3.	Reconciliation report
+	4.	Rollback plan
+
+Migrations without these artifacts must not proceed.
+
+⸻
+
+8. Compliance Checklist
+
+Pre-Execution
+	•	Schema approved
+	•	Sample migration completed
+	•	Reconciliation scripts prepared
+	•	Rollback plan approved
+
+Post-Execution
+	•	Record count validated
+	•	Data integrity verified
+	•	Application validation completed
+
+⸻
+
+9. Enforcement
+	•	Non-compliant migrations may be blocked from production execution.
+	•	Deviations require documented architectural approval.
+
+⸻
+
+10. Summary
+
+This guideline establishes a simple, enforceable, and repeatable standard for DB2 and file-based data migrations into CockroachDB, reducing risk while maintaining delivery velocity.
+
+
+
+
+
+
